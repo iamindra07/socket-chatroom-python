@@ -23,7 +23,7 @@ name = name.strip()
 def receive():
     while True:
         try:
-            msg = client_socket.recv(1024).decode('utf-8')
+            msg = client_socket.recv(4096).decode('utf-8')
             if msg == 'NAME':
                 client_socket.send(name.encode('utf-8'))
             else:

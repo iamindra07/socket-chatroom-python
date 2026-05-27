@@ -2,7 +2,23 @@ import socket
 import threading
 import datetime
 import re
+# import ollama
+from google import genai
+import os
+from dotenv import load_dotenv
+from pydantic import BaseModel
 
+load_dotenv()
+ai = genai.Client(
+    api_key=os.getenv("GEMINI_API_KEY")
+)
+
+# agent = ollama.Client()
+
+# model = "llama2"
+# # prompt = input("Enter your prompt: ")
+# # response = client.generate(model=model, prompt=prompt)
+# # print(response.response)
 IP = "127.0.0.1"
 PORT = 12345
 ADDR = (IP,PORT)
@@ -31,12 +47,15 @@ def broadcast(client_socket,msg):
 def handle(client):
     while True:
         try:
-            msg = client.recv(1024).decode('utf-8')
+            msg = client.recv(4096).decode('utf-8')
+            msg = msg.replace("\n", " ")
             index = Clients.index(client)
             name = Names[index]
             if msg ==  f"/help":
                 text = f"""{Colors.BLUE}
 ---> TO SEE WHO IS ONLINE USE '/online'
+---> TO ASK AI A QUESTION USE '/ai'
+        EXAMPLE ==> /ai what is the capital of france ?
 ---> TO SEND TEXT IN DFFERENT COLOR USE '/red','/green','/blue'
         EXAMPLE ==> /red hello
 --->TO QUIT THE CHAT USE '/quit'
@@ -116,6 +135,20 @@ def handle(client):
                 msg = msg.replace("/blue",'')
                 msg = msg.strip()
                 msg =f"{Colors.BLUE}{msg}{Colors.RESET}"
+            if msg.startswith("/ai"):
+                msg = msg.replace("/ai",'')
+                msg = msg.strip()
+                # response = agent.generate(model=model, prompt=msg)
+                # msg =str(response.response)
+                response = ai.models.generate_content(
+                    model="gemini-3.5-flash",
+                    contents=msg
+                )
+                msg = response.text
+                msg = msg.replace("\n", " ")
+                msg = f"{Colors.GREEN}AI : {msg}{Colors.RESET}"
+                client.send(msg.encode('utf-8'))
+                continue
             if msg == "/quit":
                 client.close()
                 Clients.remove(client)
