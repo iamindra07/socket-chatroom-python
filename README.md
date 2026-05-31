@@ -69,8 +69,8 @@ socket-chatroom/
 Clone the repository:
 
 ```bash
-git clone YOUR_REPOSITORY_URL
-cd socket-chatroom
+git clone https://github.com/iamindra07/socket-chatroom-python.git
+cd socket-chatroom-python
 ```
 
 Create virtual environment:
